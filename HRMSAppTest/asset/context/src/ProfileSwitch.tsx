@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, Alert, Text, StyleSheet, ScrollView, TouchableOpacity, Image, BackHandler } from 'react-native';
+import { View, Alert, Text, StyleSheet, ScrollView, TouchableOpacity, Image, BackHandler, SafeAreaView, Platform, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import LoadingAnimation from '../../context/anim/loadingAnimation';
@@ -496,109 +496,114 @@ const ProfileSwitch = ({ route, navigation }: any) => {
   };
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {isLoading ? (
-        <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
-          <LoadingAnimation />
-        </View>
-      ) : (
-        <>
-          {userProfile ? (
-            <View style={styles.contentContainer}>
-              <View style={[styles.welcomeCard, { backgroundColor: theme.card }]}>
-                <Text style={[styles.welcomeText, { color: theme.text }]}>
-                  {getLocalizedText('welcome')}
-                </Text>
-                <Text style={[styles.userDescription, { color: theme.subText }]}>
-                  {userProfile.description}
-                </Text>
-                <View style={[styles.roleContainer, { backgroundColor: theme.divider }]}>
-                  <Text style={[styles.roleText, { color: theme.text }]}>
-                    {getLocalizedText(userProfile.userRole)}
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <ScrollView 
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {isLoading ? (
+          <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+            <LoadingAnimation />
+          </View>
+        ) : (
+          <>
+            {userProfile ? (
+              <View style={styles.contentContainer}>
+                <View style={[styles.welcomeCard, { backgroundColor: theme.card }]}>
+                  <Text style={[styles.welcomeText, { color: theme.text }]}>
+                    {getLocalizedText('welcome')}
                   </Text>
+                  <Text style={[styles.userDescription, { color: theme.subText }]}>
+                    {userProfile.description}
+                  </Text>
+                  <View style={[styles.roleContainer, { backgroundColor: theme.divider }]}>
+                    <Text style={[styles.roleText, { color: theme.text }]}>
+                      {getLocalizedText(userProfile.userRole)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
 
-              <View style={[styles.sectionCard, { backgroundColor: theme.card }]}>
-                <Text style={[styles.sectionTitle, { color: theme.text }]}>
-                  {getLocalizedText('selectCompany')}
-                </Text>
-                <View style={styles.companiesContainer}>
-                  {userProfile.companies.map((company: any) => (
-                    <TouchableOpacity
-                      key={company.companyId}
-                      style={[
-                        styles.companyCard, 
-                        { 
-                          backgroundColor: theme.card,
-                          borderColor: theme.border 
-                        }
-                      ]}
-                      onPress={() => handleCompanySelect(company.companyId, userProfile.userId)}
-                    >
-                      <Text style={[styles.companyName, { color: theme.primary }]}>
-                        {company.name}
-                      </Text>
-                      <Image 
-                        source={require('../../../asset/img/icon/arrow-right.png')}
-                        style={[styles.arrowIcon, { tintColor: theme.primary }]}
-                      />
-                    </TouchableOpacity>
-                  ))}
+                <View style={[styles.sectionCard, { backgroundColor: theme.card }]}>
+                  <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                    {getLocalizedText('selectCompany')}
+                  </Text>
+                  <View style={styles.companiesContainer}>
+                    {userProfile.companies.map((company: any) => (
+                      <TouchableOpacity
+                        key={company.companyId}
+                        style={[
+                          styles.companyCard, 
+                          { 
+                            backgroundColor: theme.card,
+                            borderColor: theme.border 
+                          }
+                        ]}
+                        onPress={() => handleCompanySelect(company.companyId, userProfile.userId)}
+                      >
+                        <Text style={[styles.companyName, { color: theme.primary }]}>
+                          {company.name}
+                        </Text>
+                        <Image 
+                          source={require('../../../asset/img/icon/arrow-right.png')}
+                          style={[styles.arrowIcon, { tintColor: theme.primary }]}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
-              </View>
 
-              <TouchableOpacity
-                style={[styles.logoutButton, { backgroundColor: theme.card }]}
-                onPress={handleLogout}
-              >
-                <Image 
-                  source={require('../../../asset/img/icon/tuichu.png')}
-                  style={[styles.logoutIcon, { tintColor: theme.error }]}
-                />
-                <Text style={[styles.logoutText, { color: theme.error }]}>
-                  {getLocalizedText('logOut')}
+                <TouchableOpacity
+                  style={[styles.logoutButton, { backgroundColor: theme.card }]}
+                  onPress={handleLogout}
+                >
+                  <Image 
+                    source={require('../../../asset/img/icon/tuichu.png')}
+                    style={[styles.logoutIcon, { tintColor: theme.error }]}
+                  />
+                  <Text style={[styles.logoutText, { color: theme.error }]}>
+                    {getLocalizedText('logOut')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+                <Text style={[styles.loadingText, { color: theme.subText }]}>
+                  {getLocalizedText('loadingProfile')}
                 </Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
-              <Text style={[styles.loadingText, { color: theme.subText }]}>
-                {getLocalizedText('loadingProfile')}
-              </Text>
-            </View>
-          )}
-        </>
-      )}
-      
-      <CustomAlert
-        visible={alertConfig.visible}
-        title={alertConfig.title || ''}
-        message={alertConfig.message || ''}
-        buttons={alertConfig.buttons || []}
-        onDismiss={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
-      />
-    </ScrollView>
+              </View>
+            )}
+          </>
+        )}
+        
+        <CustomAlert
+          visible={alertConfig.visible}
+          title={alertConfig.title || ''}
+          message={alertConfig.message || ''}
+          buttons={alertConfig.buttons || []}
+          onDismiss={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
   },
+  
   scrollContent: {
     flexGrow: 1,
-    padding: 16,
+    paddingTop: Platform.OS === 'ios' ? 8 : StatusBar.currentHeight || 0, // Reduced from 44 to 8
   },
+
   contentContainer: {
     flex: 1,
-    gap: 24,
+    paddingHorizontal: 16,
+    paddingTop: 8, // Reduced padding
   },
+
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -612,7 +617,8 @@ const styles = StyleSheet.create({
   welcomeCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 20,
+    padding: 16,
+    marginBottom: 16,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

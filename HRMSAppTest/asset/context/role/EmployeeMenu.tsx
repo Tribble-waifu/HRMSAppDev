@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, BackHandler, ActivityIndicator, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, BackHandler, ActivityIndicator, Platform, Dimensions, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../modules/setting/ThemeContext';
@@ -940,7 +940,7 @@ const EmployeeMenu = ({ route, navigation }: any) => {
   const styles = StyleSheet.create({
     containerWrapper: {
       flex: 1,
-      backgroundColor: theme.background,
+      backgroundColor: '#F5F5F5',
     },
     viewDetailButton: {
       width: '92%',
@@ -958,10 +958,13 @@ const EmployeeMenu = ({ route, navigation }: any) => {
       flex: 1,
     },
     scrollViewContent: {
+      flexGrow: 1,
       paddingHorizontal: 16,
+      paddingBottom: 0,
     },
     buttonContainer: {
       flex: 1,
+      marginBottom: 0,
     },
     buttonContent: {
       flexDirection: 'row',
@@ -1140,22 +1143,16 @@ const EmployeeMenu = ({ route, navigation }: any) => {
     page: {
       width: Dimensions.get('window').width,
       height: '100%',
-      paddingBottom: 70,
+      paddingBottom: 0,
     },
     pageIndicator: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
+      height: 0,
+      opacity: 0,
+      display: 'none',
       position: 'absolute',
-      bottom: 16,
-      left: 0,
-      right: 0,
     },
     dot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginHorizontal: 4,
+      display: 'none',
     },
     workingHoursBox: {
       width: '100%',
@@ -1246,14 +1243,12 @@ const EmployeeMenu = ({ route, navigation }: any) => {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      backgroundColor: theme.card,
-      paddingVertical: 8,
+      backgroundColor: '#FFFFFF',
+      paddingTop: 10,
+      paddingBottom: Platform.OS === 'ios' ? 34 : 10,
       borderTopWidth: 1,
-      borderTopColor: theme.border,
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
+      borderTopColor: '#E0E0E0',
+      marginTop: 0,
     },
     menuItem: {
       flex: 1,
@@ -1333,180 +1328,184 @@ const EmployeeMenu = ({ route, navigation }: any) => {
   }, []); // Empty dependency array means this runs once on mount
 
   return (
-    <View style={styles.containerWrapper}>
-      {/* Profile Button */}
-      <TouchableOpacity
-        style={[styles.viewDetailButton, { backgroundColor: theme.card }]}
-        onPress={() => {
-          if (employeeId) {
-            navigation.navigate('ViewEmployeeDetail', { employeeId });
-          } else {
-            showAlert(getLocalizedText('error'), getLocalizedText('employeeIdUnavailable'));
-          }
-        }}
-      >
-        <View style={styles.buttonContent}>
-          <View style={styles.textContainer}>
-            <Text style={[styles.employeeNoText, { color: theme.subText }]}>
-              {employeeNumber || ''}
-            </Text>
-            <Text style={[styles.employeeNameText, { color: theme.text }]}>
-              {employeeName || ''}
-            </Text>
-          </View>
-          <Image
-            source={require('../../../asset/img/icon/a-avatar.png')}
-            style={[
-              styles.avatarStyle,
-              { 
-                tintColor: theme.text,
-                backgroundColor: theme.border,
-                padding: 8,
-              }
-            ]}
-          />
-        </View>
-      </TouchableOpacity>
-
-      {/* Main Content with Horizontal Scroll */}
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {/* Timesheet Page */}
-        <View style={[styles.page]}>
-          <DashboardView />
-        </View>
-
-        {/* Dashboard Page */}
-        <View style={[styles.page]}>
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
-            <View style={styles.buttonContainer}>
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('payslip')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/gongzidan.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('payslip')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('leave')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/leave2.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('leave')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('noticeBoard')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/noticeboard.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('noticeBoard')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('attendance')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/attendance.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('attendance')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => navigation.navigate('Settings')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/shezhi.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('settings')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.squareButton, styles.logoutButtonStyle, { backgroundColor: theme.card }]}
-                  onPress={handleLogout}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/tuichu.png')} 
-                      style={[styles.iconImage, { tintColor: theme.error }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.error }]}>{getLocalizedText('logOut')}</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+    <SafeAreaView style={[styles.containerWrapper, { backgroundColor: theme.background }]}>
+      <View style={{ flex: 1 }}>
+        {/* Profile Button */}
+        <TouchableOpacity
+          style={[styles.viewDetailButton, { backgroundColor: theme.card }]}
+          onPress={() => {
+            if (employeeId) {
+              navigation.navigate('ViewEmployeeDetail', { employeeId });
+            } else {
+              showAlert(getLocalizedText('error'), getLocalizedText('employeeIdUnavailable'));
+            }
+          }}
+        >
+          <View style={styles.buttonContent}>
+            <View style={styles.textContainer}>
+              <Text style={[styles.employeeNoText, { color: theme.subText }]}>
+                {employeeNumber || ''}
+              </Text>
+              <Text style={[styles.employeeNameText, { color: theme.text }]}>
+                {employeeName || ''}
+              </Text>
             </View>
-          </ScrollView>
+            <Image
+              source={require('../../../asset/img/icon/a-avatar.png')}
+              style={[
+                styles.avatarStyle,
+                { 
+                  tintColor: theme.text,
+                  backgroundColor: theme.border,
+                  padding: 8,
+                }
+              ]}
+            />
+          </View>
+        </TouchableOpacity>
+
+        {/* Main Content with Horizontal Scroll */}
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={handleScroll}
+          scrollEventThrottle={16}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          {/* Timesheet Page */}
+          <View style={[styles.page]}>
+            <DashboardView />
+          </View>
+
+          {/* Dashboard Page */}
+          <View style={[styles.page]}>
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+              <View style={styles.buttonContainer}>
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('payslip')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/gongzidan.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('payslip')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('leave')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/leave2.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('leave')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity 
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('noticeBoard')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/noticeboard.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('noticeBoard')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('attendance')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/attendance.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('attendance')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity 
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => navigation.navigate('Settings')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/shezhi.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('settings')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.squareButton, styles.logoutButtonStyle, { backgroundColor: theme.card }]}
+                    onPress={handleLogout}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/tuichu.png')} 
+                        style={[styles.iconImage, { tintColor: theme.error }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.error }]}>{getLocalizedText('logOut')}</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </ScrollView>
+
+        {/* Page Indicator */}
+        <View style={styles.pageIndicator}>
+          {[0, 1].map((index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                {
+                  backgroundColor: activeIndex === index ? theme.primary : theme.border,
+                },
+              ]}
+            />
+          ))}
         </View>
-      </ScrollView>
 
-      {/* Page Indicator */}
-      <View style={styles.pageIndicator}>
-        {[0, 1].map((index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              {
-                backgroundColor: activeIndex === index ? theme.primary : theme.border,
-              },
-            ]}
-          />
-        ))}
+        <CustomAlert
+          visible={alertConfig.visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          buttons={alertConfig.buttons}
+          onDismiss={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
+        />
       </View>
-
-      <CustomAlert
-        visible={alertConfig.visible}
-        title={alertConfig.title}
-        message={alertConfig.message}
-        buttons={alertConfig.buttons}
-        onDismiss={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
-      />
-
-      {/* Bottom Menu Bar */}
-      <View style={styles.bottomMenu}>
+      
+      {/* Bottom Menu Bar - Outside of the flex: 1 container */}
+      <View style={[styles.bottomMenu, { backgroundColor: theme.card }]}>
         <TouchableOpacity 
           style={styles.menuItem}
           onPress={() => {
@@ -1541,7 +1540,7 @@ const EmployeeMenu = ({ route, navigation }: any) => {
           {activeTab === 'dashboard' && <View style={styles.activeIndicator} />}
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

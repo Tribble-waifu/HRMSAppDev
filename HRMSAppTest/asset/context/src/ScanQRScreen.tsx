@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { RNCamera } from 'react-native-camera';
 import RNQRGenerator from 'rn-qr-generator';
@@ -284,7 +284,11 @@ const ScanQRScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: theme.background }]}
+      contentContainerStyle={styles.scrollContent}
+      bounces={false}
+    >
       {/* Header Section */}
       <View style={[styles.headerCard, { backgroundColor: theme.card }]}>
         <Text style={[styles.headerText, { color: theme.text }]}>
@@ -295,7 +299,7 @@ const ScanQRScreen = ({ navigation, route }: any) => {
         </Text>
       </View>
 
-      {/* Scanner Section - Updated styling */}
+      {/* Scanner Section */}
       <View style={[styles.scannerCard, { 
         backgroundColor: theme.card,
         borderColor: theme.border,
@@ -359,15 +363,20 @@ const ScanQRScreen = ({ navigation, route }: any) => {
         buttons={alertConfig.buttons}
         onDismiss={() => setAlertConfig(prev => ({ ...prev, visible: false }))}
       />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
+  
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 50, // Add extra padding at bottom
+  },
+
   headerCard: {
     borderRadius: 12,
     padding: 20,
@@ -400,7 +409,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     alignSelf: 'center',
     width: '100%',
-    maxWidth: 300,
+    maxWidth: 250, // Reduced from 300 for smaller screens
   },
   cameraContainer: {
     padding: 0,
@@ -420,7 +429,7 @@ const styles = StyleSheet.create({
   actionContainer: {
     gap: 12,
     marginTop: 12,
-    marginBottom: 34,
+    marginBottom: 20,
     paddingHorizontal: 16,
   },
   actionButton: {

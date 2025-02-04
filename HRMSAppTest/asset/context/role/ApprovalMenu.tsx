@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Animated, Dimensions, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Animated, Dimensions, ActivityIndicator, Platform, SafeAreaView, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../modules/setting/ThemeContext';
 import { useLanguage } from '../modules/setting/LanguageContext';
@@ -668,7 +668,7 @@ const ApprovalMenu = ({ route, navigation }: any) => {
     containerWrapper: {
       flex: 1,
       backgroundColor: theme.background,
-      paddingBottom: 60,
+      paddingTop: Platform.OS === 'ios' ? 8 : StatusBar.currentHeight || 0,
     },
     container: {
       flexGrow: 1,
@@ -679,7 +679,7 @@ const ApprovalMenu = ({ route, navigation }: any) => {
       alignSelf: 'center',
       borderRadius: 12,
       paddingVertical: 12,
-      marginVertical: 8,
+      marginTop: 8,
       marginBottom: 12,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
@@ -1140,213 +1140,215 @@ const ApprovalMenu = ({ route, navigation }: any) => {
   };
 
   return (
-    <View style={styles.containerWrapper}>
-      <TouchableOpacity
-        style={[styles.viewDetailButton, { backgroundColor: theme.card }]}
-        onPress={() => {
-          if (employeeId) {
-            navigation.navigate('ViewEmployeeDetail', { employeeId });
-          } else {
-            showAlert(getLocalizedText('error'), getLocalizedText('employeeIdUnavailable'));
-          }
-        }}
-      >
-        <View style={styles.buttonContent}>
-          <View style={styles.textContainer}>
-            <Text style={[styles.employeeNoText, { color: theme.subText }]}>
-              {employeeNumber}
-            </Text>
-            <Text style={[styles.employeeNameText, { color: theme.text }]}>
-              {employeeName}
-            </Text>
-          </View>
-          <Image
-            source={require('../../../asset/img/icon/a-avatar.png')}
-            style={[styles.avatarStyle, { tintColor: theme.background === '#000000' ? '#FFFFFF' : undefined }]}
-          />
-        </View>
-      </TouchableOpacity>
-
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScroll}
-        scrollEventThrottle={16}
-      >
-        <View style={[styles.page]}>
-          <DashboardView />
-        </View>
-
-        <View style={[styles.page]}>
-          <ScrollView 
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollViewContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.buttonContainer}>
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('payslip')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image source={require('../../img/icon/gongzidan.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('payslip')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('leave')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image source={require('../../img/icon/leave2.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('leave')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('noticeBoard')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image source={require('../../img/icon/noticeboard.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('noticeBoard')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => handleButtonPress('attendance')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image source={require('../../img/icon/attendance.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('attendance')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => navigation.navigate('ApproveManagement')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../img/icon/a-circle-check.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('approvals')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={() => navigation.navigate('Settings')}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../../asset/img/icon/shezhi.png')} 
-                      style={[styles.iconImage, { tintColor: theme.primary }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.text }]}>
-                      {getLocalizedText('settings')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={[styles.squareButton, { backgroundColor: theme.card }]}
-                  onPress={handleLogout}
-                >
-                  <View style={styles.iconTextContainer}>
-                    <Image 
-                      source={require('../../img/icon/tuichu.png')} 
-                      style={[styles.iconImage, { tintColor: theme.error }]} 
-                    />
-                    <Text style={[styles.squareButtonText, { color: theme.error }]}>
-                      {getLocalizedText('logOut')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                <View style={[styles.squareButton, { opacity: 0 }]} />
-              </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <View style={styles.containerWrapper}>
+        <TouchableOpacity
+          style={[styles.viewDetailButton, { backgroundColor: theme.card }]}
+          onPress={() => {
+            if (employeeId) {
+              navigation.navigate('ViewEmployeeDetail', { employeeId });
+            } else {
+              showAlert(getLocalizedText('error'), getLocalizedText('employeeIdUnavailable'));
+            }
+          }}
+        >
+          <View style={styles.buttonContent}>
+            <View style={styles.textContainer}>
+              <Text style={[styles.employeeNoText, { color: theme.subText }]}>
+                {employeeNumber}
+              </Text>
+              <Text style={[styles.employeeNameText, { color: theme.text }]}>
+                {employeeName}
+              </Text>
             </View>
-          </ScrollView>
+            <Image
+              source={require('../../../asset/img/icon/a-avatar.png')}
+              style={[styles.avatarStyle, { tintColor: theme.background === '#000000' ? '#FFFFFF' : undefined }]}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={handleScroll}
+          scrollEventThrottle={16}
+        >
+          <View style={[styles.page]}>
+            <DashboardView />
+          </View>
+
+          <View style={[styles.page]}>
+            <ScrollView 
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollViewContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.buttonContainer}>
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('payslip')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image source={require('../../img/icon/gongzidan.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('payslip')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('leave')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image source={require('../../img/icon/leave2.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('leave')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('noticeBoard')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image source={require('../../img/icon/noticeboard.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('noticeBoard')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => handleButtonPress('attendance')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image source={require('../../img/icon/attendance.png')} style={[styles.iconImage, { tintColor: theme.primary }]} />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('attendance')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity 
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => navigation.navigate('ApproveManagement')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../img/icon/a-circle-check.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('approvals')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={() => navigation.navigate('Settings')}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../../asset/img/icon/shezhi.png')} 
+                        style={[styles.iconImage, { tintColor: theme.primary }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.text }]}>
+                        {getLocalizedText('settings')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.squareButton, { backgroundColor: theme.card }]}
+                    onPress={handleLogout}
+                  >
+                    <View style={styles.iconTextContainer}>
+                      <Image 
+                        source={require('../../img/icon/tuichu.png')} 
+                        style={[styles.iconImage, { tintColor: theme.error }]} 
+                      />
+                      <Text style={[styles.squareButtonText, { color: theme.error }]}>
+                        {getLocalizedText('logOut')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <View style={[styles.squareButton, { opacity: 0 }]} />
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </ScrollView>
+
+        <View style={styles.pageIndicator}>
+          {[0, 1].map((index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                {
+                  backgroundColor: activeTab === (index === 0 ? 'timesheet' : 'dashboard') ? theme.primary : theme.border,
+                },
+              ]}
+            />
+          ))}
         </View>
-      </ScrollView>
 
-      <View style={styles.pageIndicator}>
-        {[0, 1].map((index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              {
-                backgroundColor: activeTab === (index === 0 ? 'timesheet' : 'dashboard') ? theme.primary : theme.border,
-              },
-            ]}
-          />
-        ))}
+        <View style={styles.bottomMenu}>
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => {
+              setActiveTab('timesheet');
+              scrollViewRef.current?.scrollTo({ x: 0, animated: true });
+            }}
+          >
+            <Image
+              source={require('../../../asset/img/icon/timesheet.png')}
+              style={[styles.menuIcon, { tintColor: activeTab === 'timesheet' ? '#007AFF' : '#8E8E93' }]}
+            />
+            <Text style={[styles.menuText, { color: activeTab === 'timesheet' ? '#007AFF' : '#8E8E93' }]}>
+              {getLocalizedText('timesheet')}
+            </Text>
+            {activeTab === 'timesheet' && <View style={styles.activeIndicator} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem}
+            onPress={() => {
+              setActiveTab('dashboard');
+              scrollViewRef.current?.scrollTo({ x: Dimensions.get('window').width, animated: true });
+            }}
+          >
+            <Image
+              source={require('../../../asset/img/icon/dashboard.png')}
+              style={[styles.menuIcon, { tintColor: activeTab === 'dashboard' ? '#007AFF' : '#8E8E93' }]}
+            />
+            <Text style={[styles.menuText, { color: activeTab === 'dashboard' ? '#007AFF' : '#8E8E93' }]}>
+              {getLocalizedText('dashboard')}
+            </Text>
+            {activeTab === 'dashboard' && <View style={styles.activeIndicator} />}
+          </TouchableOpacity>
+        </View>
+
+        <CustomAlert
+          visible={alertConfig.visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          buttons={alertConfig.buttons}
+        />
       </View>
-
-      <View style={styles.bottomMenu}>
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={() => {
-            setActiveTab('timesheet');
-            scrollViewRef.current?.scrollTo({ x: 0, animated: true });
-          }}
-        >
-          <Image
-            source={require('../../../asset/img/icon/timesheet.png')}
-            style={[styles.menuIcon, { tintColor: activeTab === 'timesheet' ? '#007AFF' : '#8E8E93' }]}
-          />
-          <Text style={[styles.menuText, { color: activeTab === 'timesheet' ? '#007AFF' : '#8E8E93' }]}>
-            {getLocalizedText('timesheet')}
-          </Text>
-          {activeTab === 'timesheet' && <View style={styles.activeIndicator} />}
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={() => {
-            setActiveTab('dashboard');
-            scrollViewRef.current?.scrollTo({ x: Dimensions.get('window').width, animated: true });
-          }}
-        >
-          <Image
-            source={require('../../../asset/img/icon/dashboard.png')}
-            style={[styles.menuIcon, { tintColor: activeTab === 'dashboard' ? '#007AFF' : '#8E8E93' }]}
-          />
-          <Text style={[styles.menuText, { color: activeTab === 'dashboard' ? '#007AFF' : '#8E8E93' }]}>
-            {getLocalizedText('dashboard')}
-          </Text>
-          {activeTab === 'dashboard' && <View style={styles.activeIndicator} />}
-        </TouchableOpacity>
-      </View>
-
-      <CustomAlert
-        visible={alertConfig.visible}
-        title={alertConfig.title}
-        message={alertConfig.message}
-        buttons={alertConfig.buttons}
-      />
-    </View>
+    </SafeAreaView>
   );
 };
 
