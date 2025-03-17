@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Image,
   Modal,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../setting/ThemeContext';
@@ -134,6 +135,7 @@ const CreateLeaveApplication = ({ navigation, route }: any) => {
   });
   const [showSessionPopup, setShowSessionPopup] = useState<string | null>(null); // stores dateKey of active popup
   const [leaveSettings, setLeaveSettings] = useState<LeaveSettings | null>(null);
+  
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -602,51 +604,130 @@ const CreateLeaveApplication = ({ navigation, route }: any) => {
           style={[styles.dateButton, { backgroundColor: theme.background }]}
           onPress={() => setShowFromDatePicker(true)}
         >
-          <Text style={[styles.dateText, { color: theme.subText }]}>From</Text>
+          <Text style={[styles.dateText, { color: theme.subText }]}>
+            {getLocalizedText('fromDate')}
+          </Text>
           <Text style={[styles.dateValue, { color: theme.text }]}>
             {dateFrom.toLocaleDateString()}
           </Text>
         </TouchableOpacity>
-
+  
         <TouchableOpacity 
           style={[styles.dateButton, { backgroundColor: theme.background }]}
           onPress={() => setShowToDatePicker(true)}
         >
-          <Text style={[styles.dateText, { color: theme.subText }]}>To</Text>
+          <Text style={[styles.dateText, { color: theme.subText }]}>
+            {getLocalizedText('toDate')}
+          </Text>
           <Text style={[styles.dateValue, { color: theme.text }]}>
             {dateTo.toLocaleDateString()}
           </Text>
         </TouchableOpacity>
       </View>
-      
-      {showFromDatePicker && (
-        <DateTimePicker
-          value={dateFrom}
-          mode="date"
-          display="default"
-          themeVariant={theme.background === '#000000' ? 'dark' : 'light'}
-          onChange={(event, selectedDate) => {
-            setShowFromDatePicker(false);
-            if (selectedDate) {
-              setDateFrom(selectedDate);
-            }
-          }}
-        />
-      )}
-
-      {showToDatePicker && (
-        <DateTimePicker
-          value={dateTo}
-          mode="date"
-          display="default"
-          themeVariant={theme.background === '#000000' ? 'dark' : 'light'}
-          onChange={(event, selectedDate) => {
-            setShowToDatePicker(false);
-            if (selectedDate) {
-              setDateTo(selectedDate);
-            }
-          }}
-        />
+  
+      {Platform.OS === 'ios' ? (
+        // iOS DatePicker with Modal
+        (showFromDatePicker || showToDatePicker) && (
+          <Modal
+            visible={showFromDatePicker || showToDatePicker}
+            transparent={true}
+            animationType="slide"
+          >
+            <TouchableOpacity 
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => {
+                setShowFromDatePicker(false);
+                setShowToDatePicker(false);
+              }}
+            >
+              <View style={[styles.datePickerContainer, { backgroundColor: theme.card }]}>
+                <View style={styles.datePickerHeader}>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      setShowFromDatePicker(false);
+                      setShowToDatePicker(false);
+                    }}
+                  >
+                    <Text style={styles.cancelButton}>{getLocalizedText('cancel')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      setShowFromDatePicker(false);
+                      setShowToDatePicker(false);
+                    }}
+                  >
+                    <Text style={[styles.doneButton, { color: theme.primary }]}>
+                      {getLocalizedText('done')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={showFromDatePicker ? dateFrom : dateTo}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) {
+                      if (showFromDatePicker) {
+                        setDateFrom(selectedDate);
+                        if (selectedDate > dateTo) {
+                          setDateTo(selectedDate);
+                        }
+                      } else {
+                        if (selectedDate >= dateFrom) {
+                          setDateTo(selectedDate);
+                        }
+                      }
+                    }
+                  }}
+                  minimumDate={new Date()}
+                  style={styles.datePicker}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
+        )
+      ) : (
+        // Android DatePicker
+        <>
+          {showFromDatePicker && (
+            <DateTimePicker
+              value={dateFrom}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowFromDatePicker(false);
+                if (selectedDate) {
+                  setDateFrom(selectedDate);
+                  if (selectedDate > dateTo) {
+                    setDateTo(selectedDate);
+                  }
+                }
+              }}
+              minimumDate={new Date()}
+            />
+          )}
+          {showToDatePicker && (
+            <DateTimePicker
+              value={dateTo}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowToDatePicker(false);
+                if (selectedDate) {
+                  if (selectedDate >= dateFrom) {
+                    setDateTo(selectedDate);
+                  } else {
+                    setAlertTitle(getLocalizedText('dateValidation'));
+                    setAlertMessage(getLocalizedText('invalidDateRange'));
+                    setShowAlert(true);
+                  }
+                }
+              }}
+              minimumDate={dateFrom}
+            />
+          )}
+        </>
       )}
     </View>
   );
@@ -1496,6 +1577,8 @@ const CreateLeaveApplication = ({ navigation, route }: any) => {
   );
 };
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1766,6 +1849,39 @@ const styles = StyleSheet.create({
   remarkLabel: {
     fontSize: 14,
   },
+
+  datePickerOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  datePickerContainer: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  cancelButton: {
+    fontSize: 17,
+    color: '#FF3B30',
+    fontWeight: '400',
+  },
+  doneButton: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  datePicker: {
+    height: 200,
+    backgroundColor: 'transparent',
+  },
+
 });
 
 export default CreateLeaveApplication;
